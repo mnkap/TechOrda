@@ -35,3 +35,12 @@ web-server: 0
 ---
 
 ### Ответ
+server {
+    server_name localhost;
+    listen 80;
+
+   location /api/ {
+        rewrite ^/api/?$ http://localhost:9090 break;
+       
+ }
+}

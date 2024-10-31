@@ -48,3 +48,4 @@ server {
       add_header Content-Type text/plain;
 
 }
+}

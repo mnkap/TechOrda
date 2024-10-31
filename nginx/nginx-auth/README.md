@@ -10,3 +10,7 @@
 6. Учетка `design` не должна иметь доступ на другие пути, тоже самое касается других учеток.
 
 ---
+echo "127.0.0.1 example.com" >> /etc/hosts
+
+openssl passwd user1
+openssl passwd user2
