@@ -42,7 +42,7 @@
 ---
 
 ### Ответ
-
+```
 from fastapi import FastAPI, Header
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
