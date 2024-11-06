@@ -73,3 +73,113 @@
 ---
 
 ### Ответ
+from fastapi import FastAPI, Header
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+import prometheus_client
+from prometheus_client import Counter, Histogram, Gauge
+
+app = FastAPI()
+metrics_app = prometheus_client.make_asgi_app()
+app.mount("/metrics", metrics_app)
+
+c = Counter('http_requests_total', 'Number of HTTP requests received')
+h = Histogram('http_requests_milliseconds', 'Duration of HTTP requests in milliseconds')
+gsum = Gauge('last_sum1n', 'Value stores last result of sum1n')
+gfibo = Gauge('last_fibo', 'Value stores last result of fibo')
+glistsize = Gauge('list_size', 'Value stores current list size')
+gcalc = Gauge('last_calculator', 'Value stores last result of calculator')
+ccalcerror = Counter('errors_calculator_total', 'Number of errors in calculator')
+
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+
+
+@app.get("/sum1n/{n}")
+async def read_root(n):
+    n = int(n)
+    c.inc()
+    h.labels(route="/sum1n/{n}").observe(0.2)
+    res = 0
+    for i in range(n):
+        res += i
+    gsum.set(res)
+    return {"result": res}
+
+
+@app.get("/fibo/{n}")
+async def fibnums(n):
+    n = int(n)
+    if n <= 0:
+        gfibo.set(0)
+        h.observe(0.2)
+        h.labels(route="/fibo/{n}").observe(0.2)
+    elif n == 1:
+        gfibo.set(1)
+        h.observe(0.2)
+        return 0    
+    elif n == 2:
+        return 1
+    else:
+        a, b = 0, 1
+        for _ in range (2, n):
+            a, b = b, a + b
+        gfibo.set(b)
+        h.labels(route="/fibo/{n}").observe(0.2)
+        return JSONResponse(content={"result": b})
+    
+
+
+@app.post("/reverse")
+async def revers_word(string: str = Header(...)):
+    return {"result": string[::-1]}
+
+
+
+element_list = []
+# Pydantic model
+class ElementItem(BaseModel):
+    element: str
+
+@app.put("/list/")
+async def create_item(item: ElementItem):
+    element_list.append(item.element)
+    return {"message": f"Item '{item.element}' updated successfully!"}
+
+@app.get("/list/")
+async def get_list():
+    glistsize.set(len(element_list))
+    h.labels(route="/list/").observe(0.2)
+    return {"result": element_list}
+    
+
+
+
+
+class ElementItem(BaseModel):
+    expr: str
+
+@app.post("/calculator/")
+async def calc(item: ElementItem):
+    operands = item.expr.split(",")
+    num1 = float(operands[0])  
+    operator = operands[1]  
+    num2 = float(operands[2])
+    
+    match operator:
+        case "+":
+            res = num1 + num2
+        case "-":
+            res = num1 - num2
+        case "/":
+            if num2 == 0:
+                ccalcerror.inc()
+                h.labels(route="/calculator/").observe(0.2)
+                return "Division by zero is not allowed." 
+            res = num1 / num2
+        case "*":
+            res = num1 * num2
+    gcalc.set(res)
+    h.labels(route="/calculator/").observe(0.2)
+    return { "result": res } 
