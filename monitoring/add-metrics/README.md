@@ -42,4 +42,21 @@
 ---
 
 ### Ответ
+```
+from fastapi import FastAPI, Header
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+import prometheus_client
+from prometheus_client import Counter, Histogram, Gauge
 
+app = FastAPI()
+metrics_app = prometheus_client.make_asgi_app()
+app.mount("/metrics", metrics_app)
+
+c = Counter('http_requests_total', 'Number of HTTP requests received')
+h = Histogram('http_requests_milliseconds', 'Duration of HTTP requests in milliseconds')
+gsum = Gauge('last_sum1n', 'Value stores last result of sum1n')
+gfibo = Gauge('last_fibo', 'Value stores last result of fibo')
+glistsize = Gauge('list_size', 'Value stores current list size')
+gcalc = Gauge('last_calculator', 'Value stores last result of calculator')
+ccalcerror = Counter('errors_calculator_total', 'Number of errors in calculator')
