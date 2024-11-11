@@ -42,3 +42,10 @@ bash ./tester.sh
 ---
 
 ### Ответ
+docker run -d -it --name jusan-docker-bind -p 7777:80 --mount type=bind,source="$(pwd)/nginx.conf",target=/etc/nginx/nginx.conf nginx:mainline
+
+root@aman:/home/amangeldi/Desktop/TechOrda/docker/docker-bind# bash ./tester-docker-bind.sh 
+✅
+✅
+✅
+✅
