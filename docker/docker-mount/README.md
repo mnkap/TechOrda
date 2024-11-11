@@ -47,3 +47,23 @@ bash ./tester.sh
 ---
 
 ### Ответ
+curl -O https://stepik.org/media/attachments/lesson/686238/jusan-docker-mount.conf
+curl -O https://stepik.org/media/attachments/lesson/686238/jusan-docker-mount.zip
+
+unzip jusan-docker-mount.zip
+
+docker run -d -it --name jusan-docker-bind -p 9999:80 --mount type=bind,source="$(pwd)/jusan-docker-mount.conf",target=/etc/nginx/conf.d/default.conf --mount type=bind,source="$(pwd)/jusan-docker-mount",target=/var/www/example nginx:mainline
+3d50afdd2836bca6b378fcd7fbdeb7f54a83c7abf4db6b5724aa5e93789df830
+
+root@aman:/home/amangeldi/Downloads# docker ps
+CONTAINER ID   IMAGE            COMMAND                  CREATED         STATUS         PORTS                                   NAMES
+3d50afdd2836   nginx:mainline   "/docker-entrypoint.…"   3 seconds ago   Up 2 seconds   0.0.0.0:9999->80/tcp, :::9999->80/tcp   jusan-docker-bind
+
+root@aman:/home/amangeldi/Downloads# curl http://localhost:9999
+<h1>Hello, from jusan-docker-mount</h1>root@aman:/home/amangeldi/Downloads# 
+
+root@aman:/home/amangeldi/Downloads# curl http://localhost:9999/test
+Singularityroot@aman:/home/amangeldi/Downloads# 
+
+root@aman:/home/amangeldi/Downloads# curl http://localhost:9999/token
+Jusanroot@aman:/home/amangeldi/Downloads# 
