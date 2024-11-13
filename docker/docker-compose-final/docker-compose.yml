@@ -1,0 +1,22 @@
+services:
+  api:
+    image: jusan-fastapi-final:dockerized
+    container_name: jusan-compose
+    ports:
+      - 8282:8080
+    restart: on-failure
+
+  nginx:
+    image: nginx:mainline
+    volumes:
+      - type: bind
+        source: ./jusan-docker-mount.conf
+        target: /etc/nginx/conf.d/default.conf
+      - type: bind
+        source: ./jusan-docker-mount
+        target: /var/www/jusan-compose
+    ports:
+      - 8787:80
+    depends_on:
+      - api
+    restart: on-failure
