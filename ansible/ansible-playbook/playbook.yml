@@ -1,0 +1,15 @@
+---
+- hosts: lb
+  become: yes
+
+  tasks:
+    - name: Убедиться, что пакет nginx установлен
+      apt:
+        name: nginx
+        state: present
+
+    - name: Убедиться, что сервис nginx запущен
+      service:
+        name: nginx
+        state: started
+        enabled: yes
