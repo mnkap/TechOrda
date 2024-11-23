@@ -1,0 +1,16 @@
+version: "3"
+services:
+  local-vps-22:
+    image: atlekbai/local-vps:latest
+    container_name: local-vps-22
+    ports:
+      - "25:25"
+      - "80:80"
+      - "7070:7070"
+      - "8080:8080"
+      - "8888:8888"
+      - "9090:9090"
+    restart: always
+    command: "25"
+    volumes:
+      - "/root/.ssh/id_rsa.pub:/root/.ssh/authorized_keys"
