@@ -1,0 +1,7 @@
+server {
+    listen {{ listen }};
+    server_name {{ server_name }};
+    location {{ location }} {
+        return {{ response_code }} "{{ message }}";
+    }
+}

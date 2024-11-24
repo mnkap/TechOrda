@@ -1,0 +1,67 @@
+---
+- hosts: lb
+  become: 'yes'
+  tasks:
+    - apt: name=nginx state=present
+    - name: Remove default.conf
+      file:
+        path: /etc/nginx/conf.d/default.conf
+        state: absent
+    - name: nginx Start
+      service:
+        name: nginx
+        state: reloaded
+
+    - name: Loop template app.conf.j2
+      template:
+        src: app.conf.j2
+        dest: /etc/nginx/conf.d/{{ item.server_name }}.conf
+      vars:
+        listen: "{{ item.server_port }}"
+        server_name: "{{ item.server_name }}"
+        apps: "{{item.apps}}"
+      loop:
+      - server_port: 7070
+        server_name: jusan-apps.kz
+        apps:
+        - local-vps-23:9090
+        - local-vps-24:9090
+
+    - name: nginx Start
+      service:
+        name: nginx
+        state: reloaded
+
+- hosts: app
+  become: 'yes'
+  tasks:
+    - apt: name=nginx state=present
+    - name: Remove default.conf
+      file:
+        path: /etc/nginx/conf.d/default.conf
+        state: absent
+    - name: Loop template
+      template:
+        src: server.conf.j2
+        dest: /etc/nginx/conf.d/{{ item.server_name }}.conf
+      vars:
+        listen: "{{ item.listen }}"
+        server_name: "{{ item.server_name }}"
+        location: "{{ item.location }}"
+        response_code: "{{ item.response_code }}"
+        message: "{{ item.message }}"
+      loop:
+        - listen: 9090
+          server_name: test1.com
+          location: /
+          response_code: 200
+          message: Test 9090 port of test1.com
+        - listen: 9090
+          server_name: test2.com
+          location: /
+          response_code: 202
+          message: Test 9090 port of test2.com
+    - name: nginx Start
+      service:
+        name: nginx
+        state: reloaded
